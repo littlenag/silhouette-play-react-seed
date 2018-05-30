@@ -2,7 +2,7 @@
 import { createAction, handleActions } from 'redux-actions';
 
 export const initialState = {
-  language: 'de',
+  language: 'en',
   isPending: false,
   catalog: {},
 };
