@@ -1,10 +1,10 @@
 package core.exceptions
 
 /**
- * Indicates that an error occurred during a Mongo query.
+ * Indicates that an error occurred during a database query.
  *
  * @param msg   The error message.
  * @param cause The exception cause.
  */
-class MongoException(msg: String, cause: Option[Throwable] = None)
+class DbException(msg: String, cause: Option[Throwable] = None)
   extends RuntimeException(msg, cause.orNull)

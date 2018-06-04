@@ -13,9 +13,9 @@ import test.MongoSpecification
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
- * Test case for the [[UserDAOImpl]] class.
+ * Test case for the [[UserDAOMongoImpl]] class.
  */
-class UserDAOImplSpec extends PlaySpecification with MongoSpecification {
+class UserDAOMongoImplSpec extends PlaySpecification with MongoSpecification {
 
   "The `find` method" should {
     "find a user for the given login info" in new WithMongo with Context {
@@ -75,7 +75,7 @@ class UserDAOImplSpec extends PlaySpecification with MongoSpecification {
     /**
      * The user DAO implementation.
      */
-    val dao = new UserDAOImpl(app.injector.instanceOf[ReactiveMongoApi])
+    val dao = new UserDAOMongoImpl(app.injector.instanceOf[ReactiveMongoApi])
 
     /**
      * A userID for the stored user.

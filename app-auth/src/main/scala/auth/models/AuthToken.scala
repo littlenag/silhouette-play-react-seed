@@ -3,8 +3,6 @@ package auth.models
 import java.time.Instant
 import java.util.UUID
 
-import reactivemongo.bson.BSONObjectID
-
 /**
  * A token to authenticate a user against an endpoint for a short time period.
  *
@@ -14,6 +12,6 @@ import reactivemongo.bson.BSONObjectID
  */
 case class AuthToken(
   id: UUID,
-  userID: BSONObjectID,
+  userID: UUID,
   expiry: Instant
 )

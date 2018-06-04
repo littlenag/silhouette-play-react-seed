@@ -43,14 +43,14 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
     bindActor[AuthTokenCleaner](AuthTokenCleaner.Name)
     bind[Scheduler].asEagerSingleton()
 
-    bind[AuthTokenDAO].to[AuthTokenDAOImpl]
+    bind[AuthTokenDAO].to[AuthTokenDAOSlickImpl]
     bind[AuthTokenService].to[AuthTokenServiceImpl]
 
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
     bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
     bind[UserService].to[UserServiceImpl]
-    bind[UserDAO].to[UserDAOImpl]
+    bind[UserDAO].to[UserDAOSlickImpl]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[PasswordHasher].toInstance(new BCryptPasswordHasher)
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))

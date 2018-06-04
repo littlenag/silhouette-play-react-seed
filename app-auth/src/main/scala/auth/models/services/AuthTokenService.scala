@@ -3,7 +3,6 @@ package auth.models.services
 import java.util.UUID
 
 import auth.models.AuthToken
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -21,7 +20,7 @@ trait AuthTokenService {
    * @param expiry The duration a token expires.
    * @return The saved auth token.
    */
-  def create(userID: BSONObjectID, expiry: FiniteDuration = 5 minutes): Future[AuthToken]
+  def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken]
 
   /**
    * Validates a token ID.

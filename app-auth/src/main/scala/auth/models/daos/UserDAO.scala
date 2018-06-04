@@ -1,5 +1,7 @@
 package auth.models.daos
 
+import java.util.UUID
+
 import auth.models.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import reactivemongo.bson.BSONObjectID
@@ -25,7 +27,7 @@ trait UserDAO {
    * @param userID The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
-  def find(userID: BSONObjectID): Future[Option[User]]
+  def find(userID: UUID): Future[Option[User]]
 
   /**
    * Saves a user.

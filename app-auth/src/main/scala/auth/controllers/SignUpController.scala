@@ -1,8 +1,9 @@
 package auth.controllers
 
 import java.time.Clock
-import javax.inject.Inject
+import java.util.UUID
 
+import javax.inject.Inject
 import auth.forms.SignUpForm
 import auth.models.services.{ AuthTokenService, UserService }
 import auth.models.{ Registration, Settings, User }
@@ -20,7 +21,6 @@ import play.api.http.HeaderNames
 import play.api.i18n.Messages
 import play.api.libs.mailer.{ Email, MailerClient }
 import play.api.mvc._
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -119,7 +119,7 @@ class SignUpController @Inject() (
     val tokenExpiry = c.getAs[FiniteDuration](s"auth.authToken.expiry").getOrElse(5 minutes)
     val authInfo = passwordHasherRegistry.current.hash(data.password)
     val user = User(
-      id = BSONObjectID.generate,
+      id = UUID.randomUUID(),
       loginInfo = Seq(loginInfo),
       name = Some(data.name),
       email = Some(data.email),

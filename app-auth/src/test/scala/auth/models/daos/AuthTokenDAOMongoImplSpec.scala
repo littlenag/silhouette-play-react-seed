@@ -12,9 +12,9 @@ import test.MongoSpecification
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
- * Test case for the [[AuthTokenDAOImpl]] class.
+ * Test case for the [[AuthTokenDAOMongoImpl]] class.
  */
-class AuthTokenDAOImplSpec extends PlaySpecification with MongoSpecification {
+class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecification {
 
   "The `find` method" should {
     "find a token for the given ID" in new WithMongo with Context {
@@ -77,7 +77,7 @@ class AuthTokenDAOImplSpec extends PlaySpecification with MongoSpecification {
     /**
      * The auth token DAO implementation.
      */
-    val dao = new AuthTokenDAOImpl(app.injector.instanceOf[ReactiveMongoApi])
+    val dao = new AuthTokenDAOMongoImpl(app.injector.instanceOf[ReactiveMongoApi])
 
     /**
      * An ID for the stored token.

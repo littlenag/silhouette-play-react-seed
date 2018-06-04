@@ -6,7 +6,6 @@ import javax.inject.Inject
 
 import auth.models.AuthToken
 import auth.models.daos.AuthTokenDAO
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -22,10 +21,7 @@ import scala.language.postfixOps
 class AuthTokenServiceImpl @Inject() (
   authTokenDAO: AuthTokenDAO,
   clock: Clock
-)(
-  implicit
-  ex: ExecutionContext
-) extends AuthTokenService {
+)(implicit ex: ExecutionContext) extends AuthTokenService {
 
   /**
    * Creates a new auth token and saves it in the backing store.
@@ -34,7 +30,7 @@ class AuthTokenServiceImpl @Inject() (
    * @param expiry The duration a token expires.
    * @return The saved auth token.
    */
-  def create(userID: BSONObjectID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = {
+  def create(userID: UUID, expiry: FiniteDuration = 5 minutes): Future[AuthToken] = {
     val expiryDate = clock.instant().plusSeconds(expiry.toSeconds)
     val token = AuthToken(UUID.randomUUID(), userID, expiryDate)
     authTokenDAO.save(token)

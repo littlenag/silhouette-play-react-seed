@@ -1,8 +1,9 @@
 package auth.models.services
 
 import java.time.Clock
-import javax.inject.Inject
+import java.util.UUID
 
+import javax.inject.Inject
 import auth.models.daos.UserDAO
 import auth.models.{ Registration, Settings, User }
 import com.mohiva.play.silhouette.api.LoginInfo
@@ -10,7 +11,6 @@ import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.http.HeaderNames
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -48,7 +48,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, clock: Clock)(
    * @param id The ID to retrieve a user.
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
-  def retrieve(id: BSONObjectID): Future[Option[User]] = userDAO.find(id)
+  def retrieve(id: UUID): Future[Option[User]] = userDAO.find(id)
 
   /**
    * Retrieves a user that matches the specified login info.
@@ -86,7 +86,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, clock: Clock)(
         ))
       case None => // Insert a new user
         userDAO.save(User(
-          id = BSONObjectID.generate,
+          id = UUID.randomUUID(),
           loginInfo = Seq(profile.loginInfo),
           name = profile.name,
           email = profile.email,

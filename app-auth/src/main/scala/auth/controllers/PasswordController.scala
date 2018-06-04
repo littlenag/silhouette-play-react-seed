@@ -1,9 +1,9 @@
 package auth.controllers
 
 import java.util.UUID
-import javax.inject.Inject
 
-import auth.models.AuthToken
+import javax.inject.Inject
+import auth.models.{ AuthToken, User }
 import auth.models.services.{ AuthTokenService, UserService }
 import auth.utils.DefaultEnv
 import com.mohiva.play.silhouette.api._
@@ -69,7 +69,7 @@ class PasswordController @Inject() (
         val loginInfo = LoginInfo(CredentialsProvider.ID, email)
         val result = Ok(ApiResponse("auth.password.recover.successful", Messages("auth.reset.email.sent")))
         userService.retrieve(loginInfo).flatMap {
-          case Some(user) =>
+          case Some(user: User) =>
             val c = configuration.underlying
             val tokenExpiry = c.getAs[FiniteDuration](s"auth.authToken.expiry").getOrElse(5 minutes)
             authTokenService.create(user.id, tokenExpiry).map { authToken =>

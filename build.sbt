@@ -10,6 +10,7 @@ val test: Project = Project(id = "app-test", base = file("app-test"))
     libraryDependencies ++= Seq(
       Library.Play.test,
       Library.Play.specs2,
+      //Library.Play.scalatest,
       Library.Akka.testkit,
       Library.Specs2.matcherExtra,
       Library.scalaGuice,
@@ -28,7 +29,8 @@ val core: Project = Project(id = "app-core", base = file("app-core"))
     libraryDependencies ++= Seq(
       Library.scalaGuice,
       Library.apacheCommonsIO,
-      Library.playReactiveMongo
+      Library.playReactiveMongo,
+      Library.Slick.slick
     )
   )
   .enablePlugins(PlayScala, DisablePackageSettings)
@@ -46,6 +48,7 @@ val auth: Project = Project(id = "app-auth", base = file("app-auth"))
       Library.Silhouette.persistence,
       Library.Silhouette.cryptoJca,
       Library.Silhouette.persistenceReactiveMongo,
+      Library.Slick.slick,
       Library.scalaGuice,
       Library.ficus,
       Library.playMailer,
@@ -54,6 +57,7 @@ val auth: Project = Project(id = "app-auth", base = file("app-auth"))
       Library.Silhouette.testkit % Test,
       Library.Specs2.matcherExtra % Test,
       Library.Akka.testkit % Test,
+      //Library.Play.scalatest % Test,
       ws,
       guice,
       specs2 % Test

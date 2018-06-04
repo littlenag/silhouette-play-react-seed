@@ -1,11 +1,12 @@
 package auth.models.services
 
+import java.util.UUID
+
 import auth.models.User
 import com.mohiva.play.silhouette.api.services.IdentityService
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.Future
 
@@ -20,7 +21,7 @@ trait UserService extends IdentityService[User] {
    * @param id The ID to retrieve a user.
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
-  def retrieve(id: BSONObjectID): Future[Option[User]]
+  def retrieve(id: UUID): Future[Option[User]]
 
   /**
    * Saves a user.

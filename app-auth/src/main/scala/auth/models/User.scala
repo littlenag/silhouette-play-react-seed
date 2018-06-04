@@ -1,7 +1,8 @@
 package auth.models
 
+import java.util.UUID
+
 import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
-import reactivemongo.bson.BSONObjectID
 
 /**
  * The user object.
@@ -14,7 +15,7 @@ import reactivemongo.bson.BSONObjectID
  * @param settings     The user settings.
  */
 case class User(
-  id: BSONObjectID,
+  id: UUID,
   loginInfo: Seq[LoginInfo],
   name: Option[String],
   email: Option[String],

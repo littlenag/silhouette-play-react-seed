@@ -1,6 +1,6 @@
 package core.utils.mongo
 
-import core.exceptions.MongoException
+import core.exceptions.DbException
 import play.api.libs.json.{ JsObject, Reads }
 import play.modules.reactivemongo.json._
 import reactivemongo.api.collections.GenericQueryBuilder
@@ -58,10 +58,10 @@ trait MongoModel {
    * @return The entity on success or an exception on error.
    */
   protected def onSuccess[T](result: Future[WriteResult], entity: T): Future[T] = result.recoverWith {
-    case e => Future.failed(new MongoException("Got exception from MongoDB", Some(e.getCause)))
+    case e => Future.failed(new DbException("Got exception from MongoDB", Some(e.getCause)))
   }.map { r =>
     WriteResult.lastError(r) match {
-      case Some(e) => throw new MongoException(e.message, Some(e))
+      case Some(e) => throw new DbException(e.message, Some(e))
       case _       => entity
     }
   }
@@ -73,10 +73,10 @@ trait MongoModel {
    * @return The number of updated documents on success or an exception on error.
    */
   protected def updated(result: Future[WriteResult]): Future[Int] = result.recoverWith {
-    case e => Future.failed(new MongoException("Got exception from MongoDB", Some(e.getCause)))
+    case e => Future.failed(new DbException("Got exception from MongoDB", Some(e.getCause)))
   }.map { r =>
     WriteResult.lastError(r) match {
-      case Some(e) => throw new MongoException(e.message, Some(e))
+      case Some(e) => throw new DbException(e.message, Some(e))
       case _       => r.n
     }
   }
