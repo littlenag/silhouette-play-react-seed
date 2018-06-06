@@ -3,8 +3,9 @@ package auth.modules
 import auth.jobs.{ AuthTokenCleaner, Scheduler }
 import auth.models.daos._
 import auth.models.services.{ AuthTokenService, AuthTokenServiceImpl, UserService, UserServiceImpl }
-import auth.utils.{ CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv }
+import auth.utils._
 import com.google.inject.Provides
+import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.mohiva.play.silhouette.api.actions.{ SecuredErrorHandler, UnsecuredErrorHandler }
 import com.mohiva.play.silhouette.api.crypto._
@@ -18,8 +19,10 @@ import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.services._
 import com.mohiva.play.silhouette.impl.util._
 import com.mohiva.play.silhouette.password.BCryptPasswordHasher
-import com.mohiva.play.silhouette.persistence.daos.{ DelegableAuthInfoDAO, MongoAuthInfoDAO }
+import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
+import com.typesafe.config.Config
+import db.utils.SlickSession
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
@@ -27,9 +30,17 @@ import play.api.Configuration
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
 import play.api.mvc.CookieHeaderEncoding
-import play.modules.reactivemongo.ReactiveMongoApi
+import play.api.inject.ApplicationLifecycle
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+/** Closes database connections safely.  Important on dev restart. */
+class SessionCloseHook @Inject() (session: SlickSession, lifecycle: ApplicationLifecycle) {
+  lifecycle.addStopHook { () =>
+    Future.successful(session.close())
+  }
+}
 
 /**
  * The Guice `Auth` module.
@@ -43,14 +54,16 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
     bindActor[AuthTokenCleaner](AuthTokenCleaner.Name)
     bind[Scheduler].asEagerSingleton()
 
-    bind[AuthTokenDAO].to[AuthTokenDAOSlickImpl]
+    bind[SessionCloseHook].asEagerSingleton()
+
+    bind[AuthTokenDAO].to[AuthTokenDAOImpl]
     bind[AuthTokenService].to[AuthTokenServiceImpl]
 
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
     bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
     bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
     bind[UserService].to[UserServiceImpl]
-    bind[UserDAO].to[UserDAOSlickImpl]
+    bind[UserDAO].to[UserDAOImpl]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[PasswordHasher].toInstance(new BCryptPasswordHasher)
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
@@ -58,6 +71,15 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
     bind[Clock].toInstance(Clock())
     bind[java.time.Clock].toInstance(java.time.Clock.systemUTC())
   }
+
+  /**
+   * Provides the HTTP layer implementation.
+   *
+   * @param config Application configugration
+   * @return The SlickSession implementation.
+   */
+  @Provides
+  def provideSession(config: Config): SlickSession = SlickSession.forConfig("app.database", config)
 
   /**
    * Provides the HTTP layer implementation.
@@ -119,17 +141,16 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
   /**
    * Provides the implementation of the delegable `PasswordInfo` auth info DAO.
    *
-   * @param reactiveMongoApi The ReactiveMongo API.
+   * @param session The SlickSession API.
    * @param configuration    The Play configuration.
    * @return The implementation of the delegable `PasswordInfo` auth info DAO.
    */
   @Provides
   def providePasswordInfoDAO(
-    reactiveMongoApi: ReactiveMongoApi,
+    session: SlickSession,
     configuration: Configuration
   ): DelegableAuthInfoDAO[PasswordInfo] = {
-    import auth.utils.json.MongoFormats._
-    new MongoAuthInfoDAO[PasswordInfo](reactiveMongoApi, configuration)
+    new PasswordInfoDAO(session)
   }
 
   /**

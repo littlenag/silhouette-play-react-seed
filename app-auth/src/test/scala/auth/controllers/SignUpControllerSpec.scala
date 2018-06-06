@@ -165,7 +165,7 @@ class SignUpControllerSpec
         there was one(userService).save(captor)
 
         val u = captor.value
-        u.loginInfo must be equalTo Seq(loginInfo)
+        u.loginInfo must be equalTo loginInfo
         u.name must beSome(name)
         u.email must beSome(email)
         u.avatarURL must beSome(avatarURL)

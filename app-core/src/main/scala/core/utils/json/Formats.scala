@@ -4,9 +4,6 @@ import java.time.Instant
 
 import play.api.i18n.Lang
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
-
-import scala.util.{ Failure, Success }
 
 /**
  * Implicit JSON formats.
@@ -42,12 +39,6 @@ trait Formats {
     def reads(json: JsValue): JsResult[Lang] = JsSuccess(Lang(json.as[String]))
     def writes(o: Lang): JsValue = JsString(o.code)
   }
-}
-
-/**
- * Mongo centric JSON formats.
- */
-trait MongoFormats extends Formats {
 
   /**
    * Converts [[java.time.Instant]] object to JSON and vice versa.
@@ -66,14 +57,4 @@ trait MongoFormats extends Formats {
  */
 trait APIFormats extends Formats {
 
-  /**
-   * Converts [[reactivemongo.bson.BSONObjectID]] object to JSON and vice versa.
-   */
-  implicit object BSONObjectIDFormat extends Format[BSONObjectID] {
-    def reads(json: JsValue): JsResult[BSONObjectID] = BSONObjectID.parse(json.as[String]) match {
-      case Success(id) => JsSuccess(id)
-      case Failure(e)  => JsError(e.getMessage)
-    }
-    def writes(o: BSONObjectID): JsValue = JsString(o.stringify)
-  }
 }

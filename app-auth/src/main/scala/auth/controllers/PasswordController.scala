@@ -102,10 +102,9 @@ class PasswordController @Inject() (
           ApiResponse("auth.password.reset.form.invalid", Messages("invalid.form"), form.errors)
         )),
         password => userService.retrieve(authToken.userID).flatMap {
-          case Some(user) if user.loginInfo.exists(_.providerID == CredentialsProvider.ID) =>
+          case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
             val passwordInfo = passwordHasherRegistry.current.hash(password)
-            val loginInfo = user.loginInfo.find(_.providerID == CredentialsProvider.ID).get
-            authInfoRepository.update[PasswordInfo](loginInfo, passwordInfo).map { _ =>
+            authInfoRepository.update[PasswordInfo](user.loginInfo, passwordInfo).map { _ =>
               Ok(ApiResponse("auth.password.reset.successful", Messages("auth.password.reset")))
             }
           case _ => Future.successful(

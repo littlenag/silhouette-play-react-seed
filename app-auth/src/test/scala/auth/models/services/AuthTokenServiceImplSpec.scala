@@ -9,7 +9,6 @@ import org.specs2.control.NoLanguageFeatures
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.test.PlaySpecification
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -25,7 +24,7 @@ class AuthTokenServiceImplSpec extends PlaySpecification with Mockito with NoLan
     "create a new auth token and save it in the DB" in new Context {
       dao.save(any[AuthToken]) answers { p => Future.successful(p.asInstanceOf[AuthToken]) }
 
-      val userID = BSONObjectID.generate()
+      val userID = UUID.randomUUID()
       val expiry = 1 second
 
       val token = await(service.create(userID, expiry))
@@ -40,7 +39,7 @@ class AuthTokenServiceImplSpec extends PlaySpecification with Mockito with NoLan
   "The `validate` method" should {
     "return the token if one as found for the given ID" in new Context {
       val id = UUID.randomUUID()
-      val token = AuthToken(id, BSONObjectID.generate(), clock.instant())
+      val token = AuthToken(id, UUID.randomUUID(), clock.instant())
 
       dao.find(id) returns Future.successful(Some(token))
 
@@ -51,8 +50,8 @@ class AuthTokenServiceImplSpec extends PlaySpecification with Mockito with NoLan
 
   "The `clean` method" should {
     "clean all expired tokens" in new Context {
-      val token1 = AuthToken(UUID.randomUUID(), BSONObjectID.generate(), clock.instant())
-      val token2 = AuthToken(UUID.randomUUID(), BSONObjectID.generate(), clock.instant())
+      val token1 = AuthToken(UUID.randomUUID(), UUID.randomUUID(), clock.instant())
+      val token2 = AuthToken(UUID.randomUUID(), UUID.randomUUID(), clock.instant())
       val tokens = Seq(token1, token2)
 
       dao.findExpired(clock.instant()) returns Future.successful(tokens)

@@ -4,24 +4,23 @@ import java.util.UUID
 
 import auth.models.{ Registration, Settings, User }
 import com.mohiva.play.silhouette.api.LoginInfo
+import db.utils.Tables
 import javax.inject.Inject
-import play.api.libs.json.Json
-import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.JdbcProfile
+import db.utils.SlickSession
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * Give access to the [[User]] object.
  *
- * @param db The Database
+ * @param session The SlickSession
  * @param ec The execution context.
  */
-class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) extends UserDAO with Tables {
+class UserDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionContext) extends UserDAO with Tables {
 
-  val profile: JdbcProfile = _root_.slick.jdbc.PostgresProfile
+  import play.api.Logger
 
-  import profile.api._
+  import session.profile.api._
 
   /**
    * Finds a user by their login info.
@@ -34,19 +33,18 @@ class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) e
       maybeInfo <- loginInfoT.filter(r => r.providerId === loginInfo.providerID && r.providerKey === loginInfo.providerKey).result.headOption
       maybeUser <- maybeInfo match {
         case None       => DBIO.failed(new RuntimeException(s"Login info not found: $loginInfo"))
-        case Some(info) => usersT.filter(_.id === info.id).result.headOption
-      }
-      loginInfos <- maybeUser match {
-        case None       => DBIO.failed(new RuntimeException(s"No user found for extant login info: $loginInfo"))
-        case Some(user) => loginInfoT.filter(_.id === user.id).result
+        case Some(info) => usersT.filter(_.id === info.userId).result.headOption
       }
     } yield {
-      maybeUser.map(userRow => fromRow(userRow, loginInfos))
+      for {
+        user <- maybeUser
+        info <- maybeInfo
+      } yield fromRow(user, info)
     }
 
     db.run(actions.transactionally).recover {
       case ex =>
-        //logger.info(ex)
+        Logger.info(s"Issue finding $loginInfo", ex)
         None
     }
   }
@@ -60,12 +58,15 @@ class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) e
   def find(userID: UUID): Future[Option[User]] = {
     val actions = for {
       maybeUser <- usersT.filter(_.id === userID).result.headOption
-      allInfo <- maybeUser match {
+      maybeInfo <- maybeUser match {
         case None       => DBIO.failed(new RuntimeException(s"No user with id: $userID"))
-        case Some(user) => loginInfoT.filter(_.id === user.id).result
+        case Some(user) => loginInfoT.filter(_.userId === user.id).result.headOption
       }
     } yield {
-      maybeUser.map(fromRow(_, allInfo))
+      for {
+        user <- maybeUser
+        info <- maybeInfo
+      } yield fromRow(user, info)
     }
 
     db.run(actions.transactionally).recover {
@@ -82,11 +83,23 @@ class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) e
    * @return The saved user.
    */
   def save(user: User): Future[User] = {
-    val (userRow, loginInfo) = toRow(user)
+    val (userRow, loginInfoRow) = toRow(user)
 
     val actions = for {
       _ <- usersT.insertOrUpdate(userRow)
-      _ <- DBIO.sequence(loginInfo.map(loginInfoT.insertOrUpdate(_)))
+
+      maybeLoginInfo <- loginInfoT.filter(r =>
+        r.userId === loginInfoRow.userId &&
+          r.providerId === loginInfoRow.providerId &&
+          r.providerKey === loginInfoRow.providerKey).result.headOption
+
+      _ <- maybeLoginInfo match {
+        case None =>
+          val li = loginInfoRow.copy(id = Some(UUID.randomUUID()))
+          (loginInfoT += li) andThen DBIO.successful(li)
+        case Some(lir) =>
+          DBIO.successful(lir)
+      }
     } yield {
       user
     }
@@ -94,7 +107,7 @@ class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) e
     db.run(actions.transactionally)
   }
 
-  private def toRow(user: User): (UserRow, Seq[LoginInfoRow]) = {
+  private def toRow(user: User): (UserRow, LoginInfoRow) = {
     (
       UserRow(
         user.id, user.name, user.email, user.avatarURL,
@@ -102,15 +115,14 @@ class UserDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) e
         user.registration.userAgent, user.registration.activated, user.registration.dateTime,
         user.settings.lang, user.settings.timeZone
       ),
-        user.loginInfo.map(r => LoginInfoRow(user.id, r.providerID, r.providerKey))
+        LoginInfoRow(None, user.id, user.loginInfo.providerID, user.loginInfo.providerKey)
     )
   }
 
-  private def fromRow(a: UserRow, b: Seq[LoginInfoRow]): User = {
+  private def fromRow(a: UserRow, b: LoginInfoRow): User = {
     val registration = Registration(a.reg_lang, a.reg_ip, a.reg_host, a.reg_userAgent, a.reg_activated, a.reg_dateTime)
     val settings = Settings(a.lang, a.timeZone)
-    val loginInfo = b.map(r => LoginInfo(r.providerID, r.providerKey))
-    User(a.id, loginInfo, a.name, a.email, a.avatarURL, registration, settings)
+    User(a.id, LoginInfo(b.providerId, b.providerKey), a.name, a.email, a.avatarURL, registration, settings)
   }
 
 }

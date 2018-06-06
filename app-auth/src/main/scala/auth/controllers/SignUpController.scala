@@ -120,7 +120,7 @@ class SignUpController @Inject() (
     val authInfo = passwordHasherRegistry.current.hash(data.password)
     val user = User(
       id = UUID.randomUUID(),
-      loginInfo = Seq(loginInfo),
+      loginInfo = loginInfo,
       name = Some(data.name),
       email = Some(data.email),
       avatarURL = None,

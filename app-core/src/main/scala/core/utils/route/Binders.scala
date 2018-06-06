@@ -1,9 +1,8 @@
 package core.utils.route
 
-import play.api.mvc.PathBindable
-import reactivemongo.bson.BSONObjectID
+import java.util.UUID
 
-import scala.util.{ Failure, Success }
+import play.api.mvc.PathBindable
 
 /**
  * Some route binders.
@@ -11,15 +10,15 @@ import scala.util.{ Failure, Success }
 object Binders {
 
   /**
-   * Binder for a [[reactivemongo.bson.BSONObjectID]].
+   * A `java.util.UUID` bindable.
    */
-  implicit def objectIdPathBinder: PathBindable[BSONObjectID] = new PathBindable[BSONObjectID] {
-    def bind(key: String, value: String): Either[String, BSONObjectID] = {
-      BSONObjectID.parse(value) match {
-        case Success(id) => Right(id)
-        case Failure(_)  => Left("Cannot parse parameter " + key + " as BSONObjectID")
-      }
+  implicit object UUIDPathBindable extends PathBindable[UUID] {
+    def bind(key: String, value: String): Either[String, UUID] = try {
+      Right(UUID.fromString(value))
+    } catch {
+      case e: Exception => Left("Cannot parse parameter '" + key + "' with value '" + value + "' as UUID")
     }
-    def unbind(key: String, value: BSONObjectID): String = value.toString
+
+    def unbind(key: String, value: UUID): String = value.toString
   }
 }

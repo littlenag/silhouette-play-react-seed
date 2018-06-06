@@ -4,23 +4,21 @@ import java.time.Instant
 import java.util.UUID
 
 import auth.models.AuthToken
-import slick.jdbc.JdbcProfile
-import slick.jdbc.JdbcBackend.Database
+import db.utils.Tables
 import javax.inject.Inject
+import db.utils.SlickSession
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * Give access to the [[AuthToken]] object.
  *
- * @param db   The Database.
- * @param ec   The execution context.
+ * @param session  The SlickSession.
+ * @param ec       The execution context.
  */
-class AuthTokenDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionContext) extends AuthTokenDAO with Tables {
+class AuthTokenDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionContext) extends AuthTokenDAO with Tables {
 
-  val profile: JdbcProfile = _root_.slick.jdbc.PostgresProfile
-
-  import profile.api._
+  import session.profile.api._
 
   /**
    * Finds a token by its ID.
@@ -64,6 +62,6 @@ class AuthTokenDAOSlickImpl @Inject() (db: Database)(implicit ec: ExecutionConte
   }
 
   private def fromRow(a: AuthTokenRow): AuthToken = {
-    AuthToken(a.id, a.userID, a.expiry)
+    AuthToken(a.id, a.userId, a.expiry)
   }
 }

@@ -163,7 +163,7 @@ class AccountControllerSpec
         val request = FakeRequest().withCSRFToken
 
         authTokenService.validate(tokenID) returns Future.successful(Some(authToken))
-        userService.retrieve(authToken.userID) returns Future.successful(Some(user.copy(loginInfo = Seq())))
+        userService.retrieve(authToken.userID) returns Future.successful(Some(user))
 
         Response(
           BAD_REQUEST,

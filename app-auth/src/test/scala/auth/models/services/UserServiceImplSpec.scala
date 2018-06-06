@@ -1,6 +1,7 @@
 package auth.models.services
 
 import java.time.{ Clock, Instant, ZoneId }
+import java.util.UUID
 
 import auth.models.daos.UserDAO
 import auth.models.{ Registration, Settings, User }
@@ -12,7 +13,6 @@ import org.specs2.specification.Scope
 import play.api.http.HeaderNames
 import play.api.i18n.Lang
 import play.api.test.{ FakeRequest, PlaySpecification }
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -84,7 +84,7 @@ class UserServiceImplSpec extends PlaySpecification with Mockito with NoLanguage
       dao.find(profile.loginInfo) returns Future.successful(None)
 
       val u = await(service.save(profile))
-      u.loginInfo must be equalTo Seq(loginInfo)
+      u.loginInfo must be equalTo loginInfo
       u.name must be equalTo user.name
       u.email must be equalTo user.email
       u.avatarURL must be equalTo user.avatarURL
@@ -108,7 +108,7 @@ class UserServiceImplSpec extends PlaySpecification with Mockito with NoLanguage
     /**
      * A userID for the stored user.
      */
-    val userID = BSONObjectID.parse("590998e65e00005e0095f1ce").get
+    val userID = UUID.fromString("95fb4afe-ea12-4673-9796-38e17a4d32ef")
 
     /**
      * A login info for the stored user.
@@ -120,7 +120,7 @@ class UserServiceImplSpec extends PlaySpecification with Mockito with NoLanguage
      */
     val user = User(
       id = userID,
-      loginInfo = Seq(loginInfo),
+      loginInfo = loginInfo,
       name = Some("John Doe"),
       email = Some("john@doe.com"),
       avatarURL = None,

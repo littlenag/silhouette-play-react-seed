@@ -4,26 +4,25 @@ import java.time.Instant
 import java.util.UUID
 
 import auth.models.AuthToken
+import db.utils.SlickSession
 import play.api.test.{ PlaySpecification, WithApplication }
-import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.bson.BSONObjectID
-import test.MongoSpecification
+import test.DbSpecification
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
- * Test case for the [[AuthTokenDAOMongoImpl]] class.
+ * Test case for the [[AuthTokenDAOImpl]] class.
  */
-class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecification {
+class AuthTokenDAOImplSpec extends PlaySpecification with DbSpecification {
 
   "The `find` method" should {
-    "find a token for the given ID" in new WithMongo with Context {
+    "find a token for the given ID" in new WithDb with Context {
       val result = await(dao.find(id))
 
       result must beSome(token)
     }
 
-    "return None if no auth info for the given login info exists" in new WithMongo with Context {
+    "return None if no auth info for the given login info exists" in new WithDb with Context {
       val result = await(dao.find(UUID.randomUUID()))
 
       result should beNone
@@ -31,7 +30,7 @@ class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecificatio
   }
 
   "The `findExpired` method" should {
-    "find expired tokens" in new WithMongo with Context {
+    "find expired tokens" in new WithDb with Context {
       val result = await(dao.findExpired(token.expiry.plusSeconds(5)))
 
       result must be equalTo Seq(token)
@@ -39,14 +38,14 @@ class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecificatio
   }
 
   "The `save` method" should {
-    "insert a new token" in new WithMongo with Context {
+    "insert a new token" in new WithDb with Context {
       val newToken = token.copy(id = UUID.randomUUID())
 
       await(dao.save(newToken)) must be equalTo newToken
       await(dao.find(newToken.id)) must beSome(newToken)
     }
 
-    "update an existing token" in new WithMongo with Context {
+    "update an existing token" in new WithDb with Context {
       val updatedToken = token.copy(expiry = Instant.now())
 
       await(dao.save(updatedToken)) must be equalTo updatedToken
@@ -55,7 +54,7 @@ class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecificatio
   }
 
   "The `remove` method" should {
-    "remove a token" in new WithMongo with Context {
+    "remove a token" in new WithDb with Context {
       await(dao.remove(id))
       await(dao.find(id)) must beNone
     }
@@ -64,20 +63,20 @@ class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecificatio
   /**
    * The context.
    */
-  trait Context extends MongoScope {
+  trait Context extends DbScope {
     self: WithApplication =>
 
     /**
      * The test fixtures to insert.
      */
-    override val fixtures = Map(
-      "auth.tokens" -> Seq("models/daos/auth-tokens/token.json")
+    override val fixtures = Seq(
+      "models/daos/auth-tokens/token.sql"
     )
 
     /**
      * The auth token DAO implementation.
      */
-    val dao = new AuthTokenDAOMongoImpl(app.injector.instanceOf[ReactiveMongoApi])
+    val dao = new AuthTokenDAOImpl(app.injector.instanceOf[SlickSession])
 
     /**
      * An ID for the stored token.
@@ -89,8 +88,8 @@ class AuthTokenDAOMongoImplSpec extends PlaySpecification with MongoSpecificatio
      */
     val token = AuthToken(
       id = id,
-      userID = BSONObjectID.parse("590998e65e00005e0095f1ce").get,
-      expiry = Instant.ofEpochMilli(1493826799375L)
+      userID = UUID.fromString("c0a68d68-e118-4068-844c-8f420b71985e"),
+      expiry = Instant.ofEpochSecond(1493826799L)
     )
   }
 }

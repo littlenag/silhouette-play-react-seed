@@ -35,32 +35,28 @@ object Dependencies {
       val persistence: ModuleID = "com.mohiva" %% "play-silhouette-persistence" % Version.silhouette
       val cryptoJca: ModuleID = "com.mohiva" %% "play-silhouette-crypto-jca" % Version.silhouette
       val testkit: ModuleID = "com.mohiva" %% "play-silhouette-testkit" % Version.silhouette
-      val persistenceReactiveMongo: ModuleID =
-        "com.mohiva" %% "play-silhouette-persistence-reactivemongo" % Version.silhouette
     }
 
     object Slick {
       val slick = "com.typesafe.slick" %% "slick" % Version.slick
       val slickHikaricp = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
       val hikaricp = "com.zaxxer" % "HikariCP" % "2.6.3"
-      //val pgjdc = "com.impossibl.pgjdbc-ng" % "pgjdbc-ng" % "0.6"
-      val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
-      val liquibaseCore = "org.liquibase" % "liquibase-core" % "3.5.3"
-      val liquibaseSlf4j = "com.mattbertolini" % "liquibase-slf4j" % "2.0.0" % "runtime"
+      val jodaMapper = "com.github.tototoshi" %% "slick-joda-mapper" % "2.3.0"
+      val joda = "joda-time" % "joda-time" % "2.9.9"
+      val jodaConvert = "org.joda" % "joda-convert" % "1.7"
+      val postgresql = "org.postgresql" % "postgresql" % "42.2.2"
+      val h2 = "com.h2database" % "h2" % "1.4.197" % Test
     }
 
     object Akka {
       val testkit: ModuleID = "com.typesafe.akka" %% "akka-testkit" % Version.akka
     }
 
-    //val joda: ModuleID = "joda-time" % "joda-time" % "2.9.9"
     val ficus: ModuleID = "com.iheart" %% "ficus" % "1.4.2"
     val scalaGuice: ModuleID = "net.codingwell" %% "scala-guice" % "4.1.0"
     val akkaQuartzScheduler: ModuleID = "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x"
     val playMailer: ModuleID = "com.typesafe.play" %% "play-mailer" % "6.0.1"
     val playMailerGuice: ModuleID = "com.typesafe.play" %% "play-mailer-guice" % "6.0.1"
     val apacheCommonsIO: ModuleID = "commons-io" % "commons-io" % "2.4"
-    val playReactiveMongo: ModuleID = "org.reactivemongo" %% "play2-reactivemongo" % "0.12.6-play26"
-    val embedMongo: ModuleID = "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
   }
 }

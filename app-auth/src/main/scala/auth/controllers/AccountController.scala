@@ -88,7 +88,7 @@ class AccountController @Inject() (
   def activate(token: UUID): Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
     authTokenService.validate(token).flatMap {
       case Some(authToken) => userService.retrieve(authToken.userID).flatMap {
-        case Some(user) if user.loginInfo.exists(_.providerID == CredentialsProvider.ID) =>
+        case Some(user) if user.loginInfo.providerID == CredentialsProvider.ID =>
           userService.save(user.copy(registration = user.registration.copy(activated = true))).map { _ =>
             Ok(ApiResponse("auth.account.activate.successful", Messages("auth.account.activated")))
           }

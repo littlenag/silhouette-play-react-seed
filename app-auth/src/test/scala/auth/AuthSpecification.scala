@@ -1,6 +1,7 @@
 package auth
 
 import java.time.Instant
+import java.util.UUID
 
 import auth.models.{ Registration, Settings, User }
 import auth.utils.{ CustomSecuredErrorHandler, CustomUnsecuredErrorHandler, DefaultEnv }
@@ -11,7 +12,6 @@ import com.mohiva.play.silhouette.test.FakeEnvironment
 import net.codingwell.scalaguice.ScalaModule
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import reactivemongo.bson.BSONObjectID
 import test.BaseSpecification
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,8 +40,8 @@ trait AuthSpecification extends BaseSpecification {
      * A dummy user.
      */
     val user = User(
-      id = BSONObjectID.generate(),
-      loginInfo = Seq(loginInfo),
+      id = UUID.randomUUID(),
+      loginInfo = loginInfo,
       name = Some("Jon Doe"),
       email = Some(email),
       avatarURL = None,

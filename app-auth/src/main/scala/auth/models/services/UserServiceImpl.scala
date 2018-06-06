@@ -87,7 +87,7 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, clock: Clock)(
       case None => // Insert a new user
         userDAO.save(User(
           id = UUID.randomUUID(),
-          loginInfo = Seq(profile.loginInfo),
+          loginInfo = profile.loginInfo,
           name = profile.name,
           email = profile.email,
           avatarURL = profile.avatarURL,
