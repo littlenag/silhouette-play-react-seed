@@ -162,7 +162,7 @@ class PasswordControllerSpec
         val request = FakeRequest().withJsonBody(Json.obj("password" -> "password")).withCSRFToken
 
         authTokenService.validate(tokenID) returns Future.successful(Some(authToken))
-        userService.retrieve(authToken.userID) returns Future.successful(Some(user))
+        userService.retrieve(authToken.userID) returns Future.successful(Some(user.copy(loginInfo = user.loginInfo.copy(providerID = "dne"))))
 
         Response(
           BAD_REQUEST,
