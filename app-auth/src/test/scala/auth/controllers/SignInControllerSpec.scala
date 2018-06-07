@@ -81,7 +81,7 @@ class SignInControllerSpec extends ApiSpecification with AuthSpecification with 
         val request = FakeRequest().withJsonBody(Json.obj(
           "email" -> email,
           "password" -> password,
-          "rememberMe" -> "test"
+          "rememberMe" -> "src/test"
         )).withCSRFToken
 
         Response(

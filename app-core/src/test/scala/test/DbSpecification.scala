@@ -1,11 +1,11 @@
 package test
 
 import db.modules.DbModule
-import db.utils.{ MigrationAssistant, SlickSession, Tables }
+import db.utils.{ MigrationAssistant, SlickSession }
 import org.specs2.specification.core.Fragments
+import play.api.Environment
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.{ PlaySpecification, WithApplication }
-import play.api.Environment
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,13 +1,15 @@
-Silhouette Play React Seed Template
-===================================
+Silhouette Play React Slick+Flyway Seed Template
+===========================================================
 
-The Silhouette Play React Seed project shows how [Silhouette] can be used to create a SPA with [React]/[Redux] 
+This seed project shows how [Silhouette] can be used to create a SPA with [React]/[Redux] 
 and [Play]. It's a starting point which can be extended to fit your needs.
 
+It is based on this [seed project](https://github.com/setusoft/silhouette-play-react-seed).
 
 ## Features
 
-* MongoDB storage
+* Plugable SQL storage via by Slick
+* Database migrations via Flyway
 * SBT multi project
 * i18n
 * Sign Up
@@ -84,7 +86,7 @@ sbt run
 ```
 
 You can open `http://localhost:9000` which redirects you to `http://localhost:5000`. Or you open the UI directly
-with `http://localhost:5000`. (Note that mongo must be already started)
+with `http://localhost:5000`. (Note that H2 is configured by default.)
 
 
 ### Run in stage mode
@@ -124,10 +126,9 @@ modules and their dependencies.
 
 Module      | Description                             | Dependencies
 ----------- | ----------------------------------------|------------
-test        | Test related helpers                    | -
-core        | Code which is shared between modules    | test % `Test`
-auth        | Authentication related code             | core % `Compile`, test % `Test`
-admin       | A placeholder module for your code      | auth % `Compile` and `Test`, test % `Test`
+core        | Code which is shared between modules, includes DB | -
+auth        | Authentication related code                       | core % `Compile` and `Test`
+admin       | A placeholder module for your code                | auth % `Compile` and `Test`, core % `Compile` and `Test`
 
 All your custom modules should depend on the `auth` module, as long as it uses authentication based functionality.
 The `auth` module comes with a test helper, so you must depend also in `Test` on this module. 
@@ -135,6 +136,7 @@ The `auth` module comes with a test helper, so you must depend also in `Test` on
 The `root` module is located in the `src` directory of the project folder. It contains the base application code 
 and configuration. 
 
+The `core` module contains shared test helpers in `src/main/test`.
 
 ## Anatomy of the JavaScript application
 

@@ -1,4 +1,4 @@
-package core.exceptions
+package db.exceptions
 
 /**
  * Indicates that an error occurred during a database query.

@@ -256,7 +256,7 @@ class SignUpControllerSpec
      */
     override def applicationBuilder: GuiceApplicationBuilder =
       super.applicationBuilder
-        .configure("ui.dev.url" -> "test")
+        .configure("ui.dev.url" -> "src/test")
         .configure("play.i18n.langs" -> Seq(lang.code))
   }
 }

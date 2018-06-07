@@ -242,6 +242,6 @@ class AccountControllerSpec
      */
     override def applicationBuilder: GuiceApplicationBuilder =
       super.applicationBuilder
-        .configure("ui.dev.url" -> "test")
+        .configure("ui.dev.url" -> "src/test")
   }
 }

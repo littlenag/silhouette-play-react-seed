@@ -31,7 +31,7 @@ class UserDAOImplSpec extends PlaySpecification with DbSpecification {
     }
 
     "return None if no user for the given login info exists" in new WithDb with Context {
-      val result = await(dao.find(LoginInfo("test", "test")))
+      val result = await(dao.find(LoginInfo("src/test", "src/test")))
 
       result should beNone
     }

@@ -3,53 +3,28 @@ import play.sbt.{ PlayLayoutPlugin, PlayScala }
 import sbt._
 
 ////*******************************
-//// Common module
+//// Core module
 ////*******************************
-val database: Project = Project(id = "app-db", base = file("app-db"))
+lazy val core: Project = Project(id = "app-core", base = file("app-core"))
   .settings(
     libraryDependencies ++= Seq(
+      // Shared regular components
       Library.scalaGuice,
+      Library.apacheCommonsIO,
       Library.Slick.slick,
       Library.Slick.slickHikaricp,
       Library.Slick.flyway,
       Library.Slick.slickMigration,
       Library.Slick.slickMigrationFlyway,
       Library.Slick.h2,
-      Library.Slick.postgresql
-    )
-  )
-  .enablePlugins(PlayScala, DisablePackageSettings)
-  .disablePlugins(PlayLayoutPlugin)
+      Library.Slick.postgresql,
 
-////*******************************
-//// Test module
-////*******************************
-val test: Project = Project(id = "app-test", base = file("app-test"))
-  .dependsOn(database)
-  .settings(
-    libraryDependencies ++= Seq(
-      Library.Play.test,
-      Library.Play.specs2,
-      Library.Akka.testkit,
-      Library.Specs2.matcherExtra,
-      Library.scalaGuice,
-      Library.Slick.slick,
-      Library.Slick.h2,
-      filters
-    )
-  )
-
-////*******************************
-//// Core module
-////*******************************
-val core: Project = Project(id = "app-core", base = file("app-core"))
-  .dependsOn(database, test % Test)
-  .settings(
-    libraryDependencies ++= Seq(
-      Library.scalaGuice,
-      Library.apacheCommonsIO,
-      Library.Slick.slick,
-      Library.Slick.slickHikaricp
+      // Shared Test components
+      Library.Play.test % Test,
+      Library.Play.specs2 % Test,
+      Library.Akka.testkit % Test,
+      Library.Specs2.matcherExtra % Test,
+      filters % Test
     )
   )
   .enablePlugins(PlayScala, DisablePackageSettings)
@@ -58,19 +33,14 @@ val core: Project = Project(id = "app-core", base = file("app-core"))
 ////*******************************
 //// Auth module
 ////*******************************
-val auth: Project = Project(id = "app-auth", base = file("app-auth"))
-  .dependsOn(database, core, test % Test)
+lazy val auth: Project = Project(id = "app-auth", base = file("app-auth"))
+  .dependsOn(core % "compile->compile;test->test")
   .settings(
     libraryDependencies ++= Seq(
       Library.Silhouette.core,
       Library.Silhouette.passwordBcrypt,
       Library.Silhouette.persistence,
       Library.Silhouette.cryptoJca,
-      Library.Slick.slick,
-      Library.Slick.h2,
-      Library.Slick.postgresql,
-      Library.Slick.slickHikaricp,
-      Library.Slick.jodaMapper,
       Library.scalaGuice,
       Library.ficus,
       Library.playMailer,
@@ -90,16 +60,16 @@ val auth: Project = Project(id = "app-auth", base = file("app-auth"))
 ////*******************************
 //// Admin module
 ////*******************************
-val admin: Project = Project(id = "app-admin", base = file("app-admin"))
-  .dependsOn(auth % "compile->compile;test->test", test % Test)
+lazy val admin: Project = Project(id = "app-admin", base = file("app-admin"))
+  .dependsOn(core % "compile->compile;test->test", auth % "compile->compile;test->test")
   .enablePlugins(PlayScala, DisablePackageSettings)
   .disablePlugins(PlayLayoutPlugin)
 
 ////*******************************
 //// Root module
 ////*******************************
-val root: Project = Project(id = "silhouette-play-react-seed", base = file("."))
-  .aggregate(database, test, core, auth, admin)
+lazy val root: Project = Project(id = "silhouette-play-react-seed", base = file("."))
+  .aggregate(core, auth, admin)
   .dependsOn(auth, admin)
   .settings(
     libraryDependencies ++= Seq(
