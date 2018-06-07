@@ -10,7 +10,7 @@ class AdminModule extends ScalaModule {
   /**
    * Configures the module.
    */
-  def configure(): Unit = {
+  override def configure(): Unit = {
 
   }
 }

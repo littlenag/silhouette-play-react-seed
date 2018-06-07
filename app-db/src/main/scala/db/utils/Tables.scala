@@ -6,19 +6,23 @@ import java.util.UUID
 
 import play.api.i18n.Lang
 
+trait TableBase {
+  def slickSession: SlickSession
+  lazy final val db = slickSession.db
+  lazy final val profile = slickSession.profile
+}
+
 // scalastyle:off
-trait Tables {
-  val session: SlickSession
+trait Tables { this: TableBase =>
 
-  import session.profile.api._
-  lazy val db = session.db
+  import profile.api._
 
-  implicit val instantColumnType = MappedColumnType.base[Instant, Timestamp](
+  lazy implicit val instantColumnType = MappedColumnType.base[Instant, Timestamp](
     instant => new Timestamp(instant.toEpochMilli),
     timestamp => Instant.ofEpochMilli(timestamp.getTime)
   )
 
-  implicit val langColumnType = MappedColumnType.base[Lang, String](
+  lazy implicit val langColumnType = MappedColumnType.base[Lang, String](
     lang => lang.code,
     code => Lang(code)
   )
@@ -122,9 +126,12 @@ trait Tables {
   val usersT = TableQuery[Users]
   val loginInfoT = TableQuery[LoginInfos]
   val passwordInfoT = TableQuery[PasswordInfos]
-
-  val schema = authTokensT.schema ++ usersT.schema ++ loginInfoT.schema ++ passwordInfoT.schema
-  val create = DBIO.seq(schema.create)
-  val drop = DBIO.seq(schema.drop)
 }
+
+object Tables {
+  class TablesDef(val slickSession: SlickSession) extends Tables with TableBase
+
+  def apply()(implicit slickSession: SlickSession): Tables = new TablesDef(slickSession)
+}
+
 // scalastyle:on

@@ -24,7 +24,7 @@ trait BaseSpecification extends PlaySpecification {
      * The fake module used to instantiate the application.
      */
     def fakeModule: ScalaModule = new ScalaModule {
-      def configure(): Unit = {}
+      override def configure(): Unit = {}
     }
 
     /**

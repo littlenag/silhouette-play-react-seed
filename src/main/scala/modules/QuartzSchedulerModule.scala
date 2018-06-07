@@ -20,7 +20,7 @@ class QuartzSchedulerModule extends AbstractModule with ScalaModule with AkkaGui
   /**
    * Configures the module.
    */
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind[QuartzSchedulerExtension].toProvider[QuartzSchedulerProvider].in[Singleton]
   }
 }

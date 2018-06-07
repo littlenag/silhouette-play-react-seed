@@ -230,7 +230,7 @@ class AccountControllerSpec
      * The fake module used to instantiate the application.
      */
     override def fakeModule: ScalaModule = new ScalaModule {
-      def configure(): Unit = {
+      override def configure(): Unit = {
         bind[UserService].toInstance(userService)
         bind[AuthTokenService].toInstance(authTokenService)
         bind[MailerClient].toInstance(mailerClient)

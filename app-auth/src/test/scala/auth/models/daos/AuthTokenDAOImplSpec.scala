@@ -66,11 +66,14 @@ class AuthTokenDAOImplSpec extends PlaySpecification with DbSpecification {
   trait Context extends DbScope {
     self: WithApplication =>
 
+    import session.profile.api._
+
     /**
      * The test fixtures to insert.
      */
-    override val fixtures = Seq(
-      "models/daos/auth-tokens/token.sql"
+    override val actions = DBIO.seq(
+      sqlu"""INSERT INTO "auth_tokens" VALUES
+            ('bdd4e520-8803-4f7d-ab67-9b50c12e9919', 'c0a68d68-e118-4068-844c-8f420b71985e', to_timestamp(1493826799));"""
     )
 
     /**

@@ -1,2 +1,0 @@
-INSERT INTO "users" VALUES ('c0a68d68-e118-4068-844c-8f420b71985e', 'John Doe', 'john@doe.com', NULL, 'en-US', '127.0.0.1', 'localhost:9000', 'Chrome/58.0.3029.81 Safari/537.36', true, to_timestamp(1493826799), 'en-US', NULL);
-INSERT INTO "user_login_info" VALUES ('ac30b9e3-4c75-4ae3-b588-ab18a7cdbe92', 'c0a68d68-e118-4068-844c-8f420b71985e', 'credentials', 'john@doe.com');

@@ -19,9 +19,8 @@ import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.services._
 import com.mohiva.play.silhouette.impl.util._
 import com.mohiva.play.silhouette.password.BCryptPasswordHasher
-import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
+import com.mohiva.play.silhouette.persistence.daos.{ DelegableAuthInfoDAO, InMemoryAuthInfoDAO }
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
-import com.typesafe.config.Config
 import db.utils.SlickSession
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
@@ -50,7 +49,7 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
   /**
    * Configures the module.
    */
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bindActor[AuthTokenCleaner](AuthTokenCleaner.Name)
     bind[Scheduler].asEagerSingleton()
 
@@ -70,16 +69,12 @@ class AuthModule extends ScalaModule with AkkaGuiceSupport {
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())
     bind[java.time.Clock].toInstance(java.time.Clock.systemUTC())
-  }
 
-  /**
-   * Provides the HTTP layer implementation.
-   *
-   * @param config Application configugration
-   * @return The SlickSession implementation.
-   */
-  @Provides
-  def provideSession(config: Config): SlickSession = SlickSession.forConfig("app.database", config)
+    // Replace this with the bindings to your concrete DAOs
+    bind[DelegableAuthInfoDAO[OAuth1Info]].toInstance(new InMemoryAuthInfoDAO[OAuth1Info])
+    bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
+    bind[DelegableAuthInfoDAO[OpenIDInfo]].toInstance(new InMemoryAuthInfoDAO[OpenIDInfo])
+  }
 
   /**
    * Provides the HTTP layer implementation.

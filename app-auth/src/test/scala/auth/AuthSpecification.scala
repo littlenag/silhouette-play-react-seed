@@ -67,7 +67,7 @@ trait AuthSpecification extends BaseSpecification {
      * The silhouette module used to instantiate the application.
      */
     def silhouetteModule: ScalaModule = new ScalaModule {
-      def configure(): Unit = {
+      override def configure(): Unit = {
         bind[Environment[DefaultEnv]].toInstance(fakeEnv)
         bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
       }

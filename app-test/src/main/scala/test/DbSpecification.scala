@@ -1,18 +1,16 @@
 package test
 
-import java.io.InputStream
-import java.nio.file.Paths
-
-import db.utils.{ SlickSession, Tables }
-import play.api.inject._
+import db.modules.DbModule
+import db.utils.{ MigrationAssistant, SlickSession, Tables }
+import org.specs2.specification.core.Fragments
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.{ PlaySpecification, WithApplication }
-import play.api.{ Environment, Logger }
+import play.api.Environment
+import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
-import scala.io.Source
 
 /**
  * A custom specification which starts a H2 instance before all the tests, and stops it after all of them.
@@ -23,11 +21,9 @@ import scala.io.Source
 trait DbSpecification extends PlaySpecification { self =>
   sequential
 
-  import play.api.Logger
+  override def map(fs: => Fragments): Fragments = step(start()) ^ fs ^ step(stop())
 
-  lazy val tables = new {
-    val session: SlickSession = SlickSession.forConfig("app.database")
-  } with Tables
+  import play.api.Logger
 
   /**
    * Runs a fake application with a test database.
@@ -35,25 +31,30 @@ trait DbSpecification extends PlaySpecification { self =>
   class WithDb(applicationBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder())
     extends WithApplication(
       applicationBuilder
-        .bindings(bind(classOf[SlickSession]).to(tables.session))
+        .overrides(new DbModule)
         .build()
     )
 
   /**
-   * The MongoDB scope.
+   * The DB scope.
    */
   trait DbScope extends BeforeAfterWithinAround {
     self: WithApplication =>
 
     /**
-     * Names of SQL files to exec.
+     * SQL actions to exec.
      */
-    val fixtures: Seq[String] = Seq()
+    val actions: DBIO[_] = DBIO.successful(())
 
     /**
-     * The ReactiveMongo API.
+     * The SlickSession.
      */
     lazy val session = app.injector.instanceOf[SlickSession]
+
+    /**
+     * The MigrationAssistant.
+     */
+    lazy val migrationAssistant = app.injector.instanceOf[MigrationAssistant]
 
     /**
      * The application environment.
@@ -64,34 +65,45 @@ trait DbSpecification extends PlaySpecification { self =>
      * Run each of the SQL files line by line.
      */
     def before: Unit = {
-      Logger.info("BEFORE BEFORE BEFORE BEFORE BEFORE BEFORE")
-      val runStatementsF = for {
-        _ <- Future.successful(Logger.info(tables.schema.createStatements.mkString("\n")))
-        _ <- session.db.run(tables.create)
-        _ <- Future.successful(Logger.info("Tables created"))
-        st = session.db.createSession().createStatement()
-        _ <- Future {
-          fixtures.foreach { sqlFile =>
-            Logger.info(s"File: $sqlFile")
-            Source.fromInputStream(getClass.getResourceAsStream(s"/$sqlFile")).getLines.foreach { line =>
-              Logger.info(s"SQL: $line")
-              st.execute(line)
-            }
-          }
-        }
-      } yield ()
+      try {
+        val runStatementsF = for {
+          _ <- Future { migrationAssistant.migrate() }
+          _ <- session.db.run(actions)
+        } yield ()
 
-      Await.result(runStatementsF, Duration(60, SECONDS))
+        Await.result(runStatementsF, Duration(60, SECONDS))
+      } catch {
+        case ex: Exception =>
+          Logger.error("DbScope - error processing before()", ex)
+      }
     }
 
     /**
      * Drops the database after the test runs to get an isolated environment.
      */
     def after: Unit = {
-      Logger.info("AFTER AFTER AFTER AFTER AFTER AFTER AFTER")
-      Logger.info(tables.schema.dropStatements.mkString("\n"))
-      Await.result(session.db.run(tables.drop), Duration(60, SECONDS))
+      try {
+        migrationAssistant.clean()
+        session.close()
+      } catch {
+        case ex: Exception =>
+          Logger.error("DbScope - error processing after()", ex)
+      }
     }
+  }
+
+  /**
+   * Start everything.
+   */
+  private def start(): Unit = {
+
+  }
+
+  /**
+   * Stop everything.
+   */
+  private def stop(): Unit = {
+
   }
 
 }

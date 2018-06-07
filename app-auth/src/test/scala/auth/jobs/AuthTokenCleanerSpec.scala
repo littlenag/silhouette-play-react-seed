@@ -63,7 +63,7 @@ class AuthTokenCleanerSpec extends AkkaSpecification with Mockito {
      * The fake Guice module.
      */
     override val fakeModule = new ScalaModule with AkkaGuiceSupport {
-      def configure(): Unit = {
+      override def configure(): Unit = {
         bindActor[AuthTokenCleaner](AuthTokenCleaner.Name)
         bind[AuthTokenService].toInstance(authTokenService)
         bind[Clock].toInstance(clock)

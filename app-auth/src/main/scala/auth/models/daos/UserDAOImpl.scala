@@ -4,23 +4,24 @@ import java.util.UUID
 
 import auth.models.{ Registration, Settings, User }
 import com.mohiva.play.silhouette.api.LoginInfo
-import db.utils.Tables
+import db.utils.{ SlickSession, TableBase, Tables }
 import javax.inject.Inject
-import db.utils.SlickSession
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * Give access to the [[User]] object.
  *
- * @param session The SlickSession
- * @param ec The execution context.
+ * @param slickSession The SlickSession
+ * @param ec           The execution context.
  */
-class UserDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionContext) extends UserDAO with Tables {
+class UserDAOImpl @Inject() (val slickSession: SlickSession)(implicit ec: ExecutionContext) extends UserDAO with Tables with TableBase {
 
   import play.api.Logger
 
-  import session.profile.api._
+  import profile.api._
+
+  case class NoLoginInfo(msg: String) extends RuntimeException(msg)
 
   /**
    * Finds a user by their login info.
@@ -32,7 +33,7 @@ class UserDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionCo
     val actions = for {
       maybeInfo <- loginInfoT.filter(r => r.providerId === loginInfo.providerID && r.providerKey === loginInfo.providerKey).result.headOption
       maybeUser <- maybeInfo match {
-        case None       => DBIO.failed(new RuntimeException(s"Login info not found: $loginInfo"))
+        case None       => DBIO.failed(NoLoginInfo(s"Login info not found: $loginInfo"))
         case Some(info) => usersT.filter(_.id === info.userId).result.headOption
       }
     } yield {
@@ -43,8 +44,10 @@ class UserDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionCo
     }
 
     db.run(actions.transactionally).recover {
+      case _: NoLoginInfo =>
+        None
       case ex =>
-        Logger.info(s"Issue finding $loginInfo", ex)
+        Logger.debug(s"Failed processing lookup for LoginInfo='$loginInfo'", ex)
         None
     }
   }

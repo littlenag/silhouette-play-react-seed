@@ -8,9 +8,13 @@ import sbt._
 val database: Project = Project(id = "app-db", base = file("app-db"))
   .settings(
     libraryDependencies ++= Seq(
+      Library.scalaGuice,
       Library.Slick.slick,
-      Library.Slick.h2,
       Library.Slick.slickHikaricp,
+      Library.Slick.flyway,
+      Library.Slick.slickMigration,
+      Library.Slick.slickMigrationFlyway,
+      Library.Slick.h2,
       Library.Slick.postgresql
     )
   )
@@ -34,7 +38,6 @@ val test: Project = Project(id = "app-test", base = file("app-test"))
       filters
     )
   )
-
 
 ////*******************************
 //// Core module

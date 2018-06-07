@@ -287,7 +287,7 @@ class PasswordControllerSpec
      * The fake module used to instantiate the application.
      */
     override def fakeModule: ScalaModule = new ScalaModule {
-      def configure(): Unit = {
+      override def configure(): Unit = {
         bind[UserService].toInstance(userService)
         bind[AuthInfoRepository].toInstance(authInfoRepository)
         bind[AuthTokenService].toInstance(authTokenService)

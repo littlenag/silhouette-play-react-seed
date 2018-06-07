@@ -214,7 +214,7 @@ class SignInControllerSpec extends ApiSpecification with AuthSpecification with 
      * The fake module used to instantiate the application.
      */
     override def fakeModule: ScalaModule = new ScalaModule {
-      def configure(): Unit = {
+      override def configure(): Unit = {
         bind[UserService].toInstance(userService)
         bind[CredentialsProvider].toInstance(credentialsProvider)
         bind[Clock].toInstance(clock)

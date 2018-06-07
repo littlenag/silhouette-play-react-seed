@@ -4,21 +4,20 @@ import java.time.Instant
 import java.util.UUID
 
 import auth.models.AuthToken
-import db.utils.Tables
+import db.utils.{ SlickSession, TableBase, Tables }
 import javax.inject.Inject
-import db.utils.SlickSession
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * Give access to the [[AuthToken]] object.
  *
- * @param session  The SlickSession.
- * @param ec       The execution context.
+ * @param slickSession  The SlickSession.
+ * @param ec            The execution context.
  */
-class AuthTokenDAOImpl @Inject() (val session: SlickSession)(implicit ec: ExecutionContext) extends AuthTokenDAO with Tables {
+class AuthTokenDAOImpl @Inject() (val slickSession: SlickSession)(implicit ec: ExecutionContext) extends AuthTokenDAO with Tables with TableBase {
 
-  import session.profile.api._
+  import profile.api._
 
   /**
    * Finds a token by its ID.

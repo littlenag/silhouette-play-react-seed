@@ -45,7 +45,10 @@ object Dependencies {
       val joda = "joda-time" % "joda-time" % "2.9.9"
       val jodaConvert = "org.joda" % "joda-convert" % "1.7"
       val postgresql = "org.postgresql" % "postgresql" % "42.2.2"
-      val h2 = "com.h2database" % "h2" % "1.4.197" % Test
+      val h2 = "com.h2database" % "h2" % "1.4.197" // % Test
+      val flyway = "org.flywaydb" % "flyway-core" % "5.1.1"
+      val slickMigration = "io.github.nafg" %% "slick-migration-api" % "0.4.2"
+      val slickMigrationFlyway = "com.1on1development" %% "slick-migration-api-flyway" % "0.5.0-SNAPSHOT"
     }
 
     object Akka {
@@ -53,7 +56,7 @@ object Dependencies {
     }
 
     val ficus: ModuleID = "com.iheart" %% "ficus" % "1.4.2"
-    val scalaGuice: ModuleID = "net.codingwell" %% "scala-guice" % "4.1.0"
+    val scalaGuice: ModuleID = "net.codingwell" %% "scala-guice" % "4.2.1"
     val akkaQuartzScheduler: ModuleID = "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x"
     val playMailer: ModuleID = "com.typesafe.play" %% "play-mailer" % "6.0.1"
     val playMailerGuice: ModuleID = "com.typesafe.play" %% "play-mailer-guice" % "6.0.1"

@@ -4,21 +4,20 @@ import auth.models.AuthToken
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
-import db.utils.Tables
+import db.utils.{ SlickSession, TableBase, Tables }
 import javax.inject.Inject
-import db.utils.SlickSession
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * Give access to the [[AuthToken]] object.
  *
- * @param session   The SlickSession.
- * @param ec        The execution context.
+ * @param slickSession  The SlickSession.
+ * @param ec            The execution context.
  */
-class PasswordInfoDAO @Inject() (val session: SlickSession)(implicit ec: ExecutionContext) extends DelegableAuthInfoDAO[PasswordInfo] with Tables {
+class PasswordInfoDAO @Inject() (val slickSession: SlickSession)(implicit ec: ExecutionContext) extends DelegableAuthInfoDAO[PasswordInfo] with Tables with TableBase {
 
-  import session.profile.api._
+  import profile.api._
 
   /**
    * Finds the auth info which is linked to the specified login info.
