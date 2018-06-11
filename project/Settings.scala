@@ -93,7 +93,7 @@ object NpmSettings extends AutoPlugin {
     npmStart in Npm := "start",
 
     // We must define the directory in which the NPM project is located
-    npmDir in Npm := "app-ui",
+    npmDir in Npm := "app-typescript-ui",
 
     // Make the dist files available for Play, so that they can be accessed with `routes.Assets.at`.
     // This does only work in production mode. In development mode the files where served through the

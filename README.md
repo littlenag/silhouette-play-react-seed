@@ -51,7 +51,7 @@ yarn install
 
 The application is divided into a backend and a frontend part. The frontend part is located in the
 `app-ui` folder and it is based on [Neutrino]. A detailed explanation can be found in the README.md 
-of this folder. The frontend application follows the modern JavaScript development workflow. This 
+of this folder. The frontend application follows the modern TypeScript development workflow. This 
 means that in development mode we start an [Express] server on port 5000, which serves your UI. This 
 comes with the advantage that you can use [webpack]s [Hot Module Replacement]. 
 
