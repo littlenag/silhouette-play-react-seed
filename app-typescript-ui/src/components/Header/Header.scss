@@ -1,0 +1,14 @@
+#header {
+  border: 0 none;
+
+  .navbar-brand {
+    width: 54px;
+    position: relative;
+
+    img {
+      position: absolute;
+      top: 10px;
+      left: 13px;
+    }
+  }
+}
