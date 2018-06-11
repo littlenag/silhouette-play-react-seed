@@ -1,0 +1,16 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+    /* override some of the default tslint rules provided by 'tslint:recommended' */
+    "object-literal-sort-keys": false,
+    "quotemark": [false, "double", "avoid-escape"],
+    "ordered-imports": false,
+    "arrow-parens": false,
+    "object-literal-shorthand": false,
+    "semicolon": [false, "never"],
+    "interface-name": [true, "never-prefix"],
+    "trailing-comma": false,
+    "whitespace": [true, "check-branch", "check-operator"],
+    "no-consecutive-blank-lines": [true, 2]
+  }
+}
